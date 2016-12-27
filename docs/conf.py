@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # python-sock-tools documentation build configuration file, created by
-# sphinx-quickstart on Tue Dec 27 12:07:50 2016.
+# sphinx-quickstart on Tue Dec 27 13:28:14 2016.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -16,9 +16,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, u'/home/gareth/python-sock-tools')
 
 
 # -- General configuration ------------------------------------------------
@@ -32,7 +32,8 @@
 # ones.
 extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.todo',
-    'sphinx.ext.coverage']
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -65,7 +66,7 @@ release = u'alpha'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -156,3 +157,28 @@ texinfo_documents = [
 
 
 
+# -- Options for Epub output ----------------------------------------------
+
+# Bibliographic Dublin Core info.
+epub_title = project
+epub_author = author
+epub_publisher = author
+epub_copyright = copyright
+
+# The unique identifier of the text. This can be a ISBN number
+# or the project homepage.
+#
+# epub_identifier = ''
+
+# A unique identification for the text.
+#
+# epub_uid = ''
+
+# A list of files that should not be packed into the epub file.
+epub_exclude_files = ['search.html']
+
+
+autoclass_content = 'both'
+autoclass_content = 'both'
+autoclass_content = 'both'
+autoclass_content = 'both'
