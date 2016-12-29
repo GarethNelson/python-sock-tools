@@ -1,5 +1,8 @@
-This repo contains some nice tools for writing networking applications in Python that require a message based protocol.
+A nice little python package for doing message-based protocols and abstracting away all the messy bits.
 
-To use it, copy base_sock.py and the other relevant file into your own project, and make sure to obey the GPL or I will have such revenges upon you that they shall be the terrors of the earth.
+Originally built in order to abstract some of the networking layer when building an implementation of the minecraft for my YATE project.
 
-This code also requires eventlet to be installed, which itself requires greenlet
+Dependencies:
+ * eventlet (and therefore greenlet)
+ * msgpack if using msgpack_proto.py
+

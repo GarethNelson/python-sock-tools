@@ -47,7 +47,7 @@ class ChatProtocol(tcp_sock.TCPSock):
           dict: the message handlers dict, updated to configure message type 0 so it calls handle_msg
        """
        handlers = super(ChatProtocol,self).get_default_handlers() # it's good practice to add the default handlers from upstream, even though it's pointless in this particular example
-       handlers[0] = self.handle_msg
+       handlers[0] = [self.handle_msg]
        return handlers
    def handle_msg(self,from_addr,msg_type,msg_data):
        """ Handler for message type 0

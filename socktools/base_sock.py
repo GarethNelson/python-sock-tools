@@ -61,7 +61,7 @@ class BaseSock(object):
    Keyword Args:
       bind (tuple):         if not None, specifies a TCP/IP endpoint as (ip,port) to bind to and listen on
       connect (tuple):      if not None, specifies a TCP/IP endpoint as (ip,port) to connect to
-      handlers (dict):      maps message types to message handler functions
+      handlers (dict):      maps message types to list of message handler functions
       timeout (int):        time in seconds before a peer is considered to have timed out
       tick_interval (int):  time in seconds to wait between ticks
       sock (socket.socket): if not None, specifies a socket object to be used - should be used only for testing
@@ -73,7 +73,7 @@ class BaseSock(object):
       in_q (eventlet.queue.LightQueue):    parsed messages are added to this queue after being parsed
       timeout (int):                       the timeout interval in seconds - peers must talk to us on a regular basis to avoid being timed out
       tick_interval (int):                 the tick interval - what exactly a tick does is up to the application
-      handlers (dict):                     maps message types to message handler functions
+      handlers (dict):                     maps message types to list of message handler functions
       sock:                                arbitrary object representing the physical socket, defaults to an instance of DummySocket
       active (bool):                       indicates whether this socket is active and working
    """
@@ -92,11 +92,24 @@ class BaseSock(object):
        self.tick_interval = tick_interval
        if not (bind is None):    self.sock.bind(bind)
        if not (connect is None): self.connect_to(connect)
+       self.child_setup()
        self.active = True
        for x in xrange(10): self.pool.spawn_n(self.parser_thread)
        for x in xrange(10): self.pool.spawn_n(self.handler_thread)
        self.pool.spawn_n(self.recv_thread)
        self.pool.spawn_n(self.timeout_thread)
+   def child_setup(self):
+       """Convenient setup hook for child classes
+       
+       To avoid the need to rewrite __init__ when inheriting from this class, __init__ calls this method before spawning threads and going active.
+
+       Without this hook, any child class that adds extra params to __init__ would need to have a copy of the implementation as it is not possible to modify certain things after threads are spawned.
+
+       See msgtype_mixin.py for a good example of how to use this.
+       
+       In the default implementation it does nothing.
+       """
+       pass
    def get_default_handlers(self):
        """Get a default handlers dict
        
@@ -198,7 +211,8 @@ class BaseSock(object):
             eventlet.greenthread.sleep(0)
             addr,msg_type,msg_data = self.in_q.get()
             if self.handlers.has_key(msg_type):
-               self.pool.spawn_n(self.handler_wrapper,self.handlers[msg_type],addr,msg_type,msg_data)
+               for handler in self.handlers[msg_type]:
+                   self.pool.spawn_n(self.handler_wrapper,handler,addr,msg_type,msg_data)
    def handler_wrapper(self,handler,addr,msg_type,msg_data):
        """Invokes the specified handler while catching exceptions
 
@@ -284,7 +298,7 @@ class BaseSock(object):
          data (str): the raw packet to be parsed, this should be one whole message
 
        Returns:
-         tuple of (msg_type,msg_data) - the specific types of msg_type and msg_data depend on the application
+         tuple: a tuple of (msg_type,msg_data) - the specific types of msg_type and msg_data depend on the application
        
        Note:
          If not overridden, by default this method returns a message of type 0 and the raw data as msg_data.
@@ -362,9 +376,6 @@ class BaseSock(object):
        
        Keyword args:
          to_peer(tuple): the TCP/IP endpoint as a (host,ip) tuple to transmit to, if this is set to None then all peers will be sent the packet
-
-       Note:
-         The default implementation together with DummySocket will result in printing a hex dump of the packet to stdout
 
        Warnings:
          This method must NOT block except via eventlet, failure to heed this warning will result in crippled performance.

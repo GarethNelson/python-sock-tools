@@ -8,6 +8,7 @@ Submodules
 
    socktools.base_sock
    socktools.chat_proto
+   socktools.msgtype_mixin
    socktools.tcp_sock
 
 Module contents
