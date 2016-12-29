@@ -1,16 +1,16 @@
-.. python-sock-tools documentation master file, created by
-   sphinx-quickstart on Tue Dec 27 13:28:14 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Python socktools documentation
+==============================
 
-Welcome to python-sock-tools's documentation!
-=============================================
+socktools is a python package that abstracts away all the messy parts of implementing a message-based protocol on top of a socket.
 
+Contents
+========
 .. toctree::
-   :maxdepth: 5
-   :caption: Contents:
+   :maxdepth: 6
    
-   socktools
+   overview
+   modules
+   examples
 
 Indices and tables
 ==================

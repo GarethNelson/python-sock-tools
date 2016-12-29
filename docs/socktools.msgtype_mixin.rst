@@ -1,5 +1,5 @@
-socktools.msgtype_mixin module
-==============================
+socktools.msgtype_mixin
+=======================
 
 .. automodule:: socktools.msgtype_mixin
     :members:
