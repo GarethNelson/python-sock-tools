@@ -24,6 +24,7 @@ import eventlet
 eventlet.monkey_patch()
 
 import socket
+import traceback
 import time
 
 class DummySocket(socket.socket):
@@ -51,7 +52,7 @@ class DummySocket(socket.socket):
        """
        return ('',('127.0.0.1',1337))
 
-class BaseSock:
+class BaseSock(object):
    """The base class from which specific socket classes inherit
    
    This class is the base socket class which handles queuing of messages and the main event loop.
@@ -99,7 +100,7 @@ class BaseSock:
    def get_default_handlers(self):
        """Get a default handlers dict
        
-       When inheriting from this class you should setup default handlers needed by the protocol by overriding this method
+       When inheriting from this class you should setup default handlers needed by the protocol by overriding this method. Additionally, children should always call the parent for this method.
        
        Returns:
           dict: a dict mapping message types to handlers, can be 0-length but must be a dict
@@ -120,6 +121,7 @@ class BaseSock:
           for k,v in self.known_peers.items():
               if not v.has_key('last'): v['last'] = time.time()
               if (cur_time - v['last']) >= self.timeout:
+                 self.log_debug('%s:%s timed out' % k)
                  self.close_peer(k)
    def tick(self):
        """Perform application-specific tick
@@ -178,9 +180,10 @@ class BaseSock:
              except Exception,e:
                 self.log_error('Error reading from socket',exc=e)
              if not (data is None):
-                if self.good_peer(addr):
+                if (len(data)>0) and self.good_peer(addr):
                    if self.known_peers.has_key(addr):
                       self.known_peers[addr]['last'] = time.time()
+                   self.log_debug('Got raw data: %s' % str(data))
                    self.parse_q.put((data,addr))
    def handler_thread(self):
        """Used internally - reads from in_q and passes to the appropriate handler
@@ -212,6 +215,15 @@ class BaseSock:
           handler(addr,msg_type,msg_data)
        except Exception,e:
           self.log_error('Handler for message type %s failed' % msg_type,exc=e)
+   def log_debug(self,msg):
+       """Logs debug info - if debug mode is off, this method should do nothing
+
+       The default implementation prints the message to stdout
+
+       Args:
+         msg (str): message to log
+       """
+       print msg
    def log_error(self,msg,exc=None):
        """Log an error with exception data
 
@@ -220,11 +232,14 @@ class BaseSock:
        The default implementation simply prints the message and exception data to stdout
        
        Args:
-         msg (string): error message
+         msg (str): error message
        Keyword args
          exc (Exception): a python exception related to the error
        """
-       print 'Error: %s, Exception: %s' % (msg,exc)
+       if exc is None:
+          print 'Error: %s' % msg
+       else:
+          print 'Error: %s, Exception: %s' % (msg,traceback.format_exc(exc))
        
    def parser_thread(self):
        """Used internally - reads from parse_q and puts parsed messages into in_q
@@ -233,17 +248,16 @@ class BaseSock:
           This method should only be run from inside the class and inside a greenthread
        """
        while self.active:
+         addr,data,msg_type,msg_data = None,None,None,None
          eventlet.greenthread.sleep(0)
-         data,addr = None,None
-         while ((data is None) and self.active):
-           eventlet.greenthread.sleep(0)
-           if not (data is None):
-              data,addr         = self.parse_q.get()
-              try:
-                 msg_type,msg_data = self.parse_msg(data)
-              except Exception,e:
-                 self.log_error('Error parsing packet from %s:%s' % addr,exc=e)
-              self.in_q.put((addr,msg_type,msg_data))
+         addr,data = self.parse_q.get()
+         try:
+            msg_type,msg_data = self.parse_msg(data)
+         except Exception,e:
+            self.log_error('Error parsing packet from %s:%s' % addr,exc=e)
+         addr,msg_type,msg_data = self.handle_all(addr,msg_type,msg_data)
+         self.log_debug('Putting parsed message type %s from %s:%s on queue: %s' % (str(msg_type),str(addr[0]),str(addr[1]),str(msg_data)))
+         self.in_q.put((addr,msg_type,msg_data))
    def add_handler(self,msg_type,handler,exclusive=False):
        """Add a handler for the specified message type
        
