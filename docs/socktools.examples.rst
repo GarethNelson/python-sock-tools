@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    socktools.examples.simple_chat
+   socktools.examples.simple_dns
 
 Module contents
 ---------------

@@ -1,5 +1,5 @@
 """
-Python Sock tools: dns_server.py - a simplistic DNS server example
+Python Sock tools: simple_dns.py - a simplistic DNS server example
 Copyright (C) 2016 GarethNelson
 
 This file is part of python-sock-tools
@@ -24,9 +24,9 @@ import eventlet
 eventlet.monkey_patch() # this should be done in all modules that use eventlet as the first import, just in case
 
 import dnslib
-from msgtype_mixin import MsgtypeSendMixin
-from msgtype_mixin import MsgtypeStrMixin
-from udp_sock import UDPSock
+from socktools.msgtype_mixin import MsgtypeSendMixin
+from socktools.msgtype_mixin import MsgtypeStrMixin
+from socktools.udp_sock import UDPSock
 
 class DNSProtocol(MsgtypeSendMixin,MsgtypeStrMixin,UDPSock):
    """DNS protocol implementation

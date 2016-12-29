@@ -14,7 +14,6 @@ Submodules
 .. toctree::
 
    socktools.base_sock
-   socktools.dns_server
    socktools.msgtype_mixin
    socktools.tcp_sock
    socktools.udp_sock
