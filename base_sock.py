@@ -24,7 +24,7 @@ import socket
 import time
 
 class DummySocket(socket.socket):
-   """ A socket object that does nothing except print out transmitted packets, may be useful for testing
+   """ A socket object that does nothing
    """
    def __init__(self,sock_family=socket.AF_INET,sock_type=socket.SOCK_DGRAM,proto=0):
        """ Hackish constructor for the dummy socket
@@ -134,6 +134,7 @@ class base_sock:
 
        Many network protocols, 3D gaming ones in particular, require a fixed frequency "tick", that's what is implemented here.
        This thread runs tick() in a loop and measures the time it took, adjusting the delay to compensate
+
        Note:
           This code makes no guarantees at all that the specified tick interval is actually achievable - if you get missed ticks, optimise your tick() to be more async
        """
