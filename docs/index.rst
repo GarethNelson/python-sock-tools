@@ -7,7 +7,7 @@ Welcome to python-sock-tools's documentation!
 =============================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
    :caption: Contents:
    
    socktools

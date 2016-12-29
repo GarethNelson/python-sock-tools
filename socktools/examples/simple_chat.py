@@ -1,5 +1,5 @@
 """
-Python Sock tools: chat_proto.py - multiuser "chat" implementation
+Python Sock tools: simple_chat.py - multiuser "chat" implementation
 Copyright (C) 2016 GarethNelson
 
 This file is part of python-sock-tools
@@ -27,7 +27,7 @@ Note: this is provided as an example only, it is highly recommended that you do 
 import eventlet
 eventlet.monkey_patch() # this should be done in all modules that use eventlet as the first import, just in case
 
-import tcp_sock
+from socktools import tcp_sock
 
 class ChatProtocol(tcp_sock.TCPSock):
    """Multiuser chat implementation
