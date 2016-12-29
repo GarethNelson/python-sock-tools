@@ -7,11 +7,10 @@ Welcome to python-sock-tools's documentation!
 =============================================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
-
-   base_sock
-
+   
+   socktools
 
 Indices and tables
 ==================

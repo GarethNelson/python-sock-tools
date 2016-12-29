@@ -184,4 +184,11 @@ epub_copyright = copyright
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
+
+# ignore GPL header
+
+def setup(app):
+    from sphinx.ext.autodoc import cut_lines
+    app.connect('autodoc-process-docstring', cut_lines(17, what=['module']))
+
 napoleon_include_init_with_doc = True

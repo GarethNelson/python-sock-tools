@@ -16,6 +16,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with python-sock-tools.  If not, see <http://www.gnu.org/licenses/>.
+
+This module provides the base classes used in the other modules, you should probably ignore it unless you plan to implement a new socket type.
+
 """
 import eventlet
 eventlet.monkey_patch()
@@ -38,7 +41,7 @@ class DummySocket(socket.socket):
           proto (int):       spotting a pattern yet?
        
        Note:
-          You should NOT inherit from this class normally, instead override the create_socket() method of base_sock and return a socket.socket
+          You should NOT inherit from this class normally, instead override the create_socket() method of BaseSock and return a socket.socket
        """
        pass
    def recvfrom(self,buflen=8192,flags=0):
@@ -48,7 +51,7 @@ class DummySocket(socket.socket):
        """
        return ('',('127.0.0.1',1337))
 
-class base_sock:
+class BaseSock:
    """The base class from which specific socket classes inherit
    
    This class is the base socket class which handles queuing of messages and the main event loop.
@@ -175,9 +178,10 @@ class base_sock:
              except Exception,e:
                 self.log_error('Error reading from socket',exc=e)
              if not (data is None):
-                if self.known_peers.has_key(addr):
-                   self.known_peers[addr]['last'] = time.time()
-                self.parse_q.put((data,addr))
+                if self.good_peer(addr):
+                   if self.known_peers.has_key(addr):
+                      self.known_peers[addr]['last'] = time.time()
+                   self.parse_q.put((data,addr))
    def handler_thread(self):
        """Used internally - reads from in_q and passes to the appropriate handler
 
@@ -195,8 +199,8 @@ class base_sock:
    def handler_wrapper(self,handler,addr,msg_type,msg_data):
        """Invokes the specified handler while catching exceptions
 
-       This method invokes a handler function while catching and logging any exceptions
-       If an exception is raised by the handler, base_sock.log_error() is called to notify the end user
+       This method invokes a handler function while catching and logging any exceptions.
+       If an exception is raised by the handler, BaseSock.log_error() is called to notify the end user
        
        Args:
            handler (function): a function accepting params (addr,msg_type,msg_data)
@@ -211,7 +215,8 @@ class base_sock:
    def log_error(self,msg,exc=None):
        """Log an error with exception data
 
-       This method logs errors and should be overridden to use whatever logging mechanism is appropriate in the end user application
+       This method logs errors and should be overridden to use whatever logging mechanism is appropriate in the end user application.
+
        The default implementation simply prints the message and exception data to stdout
        
        Args:
@@ -242,7 +247,8 @@ class base_sock:
    def add_handler(self,msg_type,handler,exclusive=False):
        """Add a handler for the specified message type
        
-       This method adds message handlers to the socket after it has been setup, allowing dynamic handlers
+       This method adds message handlers to the socket after it has been setup, allowing dynamic handlers.
+
        It is preferable to use static handlers whenever possible
        
        Args:
@@ -258,7 +264,7 @@ class base_sock:
    def parse_msg(self,data):
        """Parse a raw message into a format usable by the application
        
-       This method should be overridden by the application as appropriate and handles message parsing from raw packets
+       This method should be overridden by the application as appropriate and handles message parsing from raw packets.
        
        Args:
          data (str): the raw packet to be parsed, this should be one whole message
@@ -274,7 +280,7 @@ class base_sock:
    def good_peer(self,peer):
        """Check if the specified peer is one we want to talk to
 
-       If this method returns False for a peer as it sends us a message, that message will be dropped and not parsed
+       If this method returns False for a peer as it sends us a message, that message will be dropped and not parsed.
        The default implementation returns True for every peer
 
        Args:
@@ -287,9 +293,11 @@ class base_sock:
    def handle_all(self,from_addr,msg_type,msg_data):
        """Called before doing anything with a decoded/parsed packet before all other handlers
        
-       This can be used as a hook to implement whatever you want with decoded packets - stuff like encryption and compression though belongs in parse_msg()
+       This can be used as a hook to implement whatever you want with decoded packets - stuff like encryption and compression though belongs in parse_msg().
+
        After being parsed all messages pass through this method and any transformations required can be applied.
        Most applications will not need this and the default implementation (which is a simple identity function) will work fine.
+
        One application where this may be of use is to send "unknown peer" type messages if the address is not in the known peers dict.
 
        Args:
@@ -306,9 +314,13 @@ class base_sock:
        """Read a single raw packet from the socket or sockets
        
        If the underlying physical socket is UDP, this method should simply read from it and return as quickly as possible.
+
        If the underlying physical socket is a TCP socket connected to one single peer, this method should read from it and return as quickly as possible.
+
        If the underlying physical socket is a TCP server, this method should return a raw packet from the next available client.
+
        In all cases, this method should return a raw packet without parsing of any kind beyond size checking.
+
        If no data is available, this method should block using eventlet.greenthread.sleep(0) or equivalent until data is available.
 
        Note:
@@ -327,7 +339,8 @@ class base_sock:
    def send_raw(self,data,to_peer=None):
        """Send a single raw packet from the socket to the specified peer
 
-       This method sends a single raw packet (already encoded as appropriate) to the specified peer, or optionally to all connected peers
+       This method sends a single raw packet (already encoded as appropriate) to the specified peer, or optionally to all connected peers.
+
        The whole packet must be transmitted before this method returns and it must block if required via eventlet.greenthread.sleep(0) or equivalent
 
        Args:
