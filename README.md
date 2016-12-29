@@ -4,5 +4,4 @@ Originally built in order to abstract some of the networking layer when building
 
 Dependencies:
  * eventlet (and therefore greenlet)
- * msgpack if using msgpack_proto.py
-
+ * dnslib if running the dns_server.py example https://pypi.python.org/pypi/dnslib

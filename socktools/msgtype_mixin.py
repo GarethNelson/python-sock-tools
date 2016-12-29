@@ -84,7 +84,7 @@ class MsgtypeStrMixin(object):
 class _msgtype_sender:
    def __init__(self,msg_type,sock):
        self.msg_type = msg_type
-       self.sock     = self.sock
+       self.sock     = sock
    def __call__(self,*args,**kwargs):
        to_peer = None
        if kwargs.has_key('to_peer'):

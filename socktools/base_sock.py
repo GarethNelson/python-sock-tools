@@ -197,7 +197,7 @@ class BaseSock(object):
                    if self.known_peers.has_key(addr):
                       self.known_peers[addr]['last'] = time.time()
                    self.log_debug('Got raw data: %s' % str(data))
-                   self.parse_q.put((data,addr))
+                   self.parse_q.put((addr,data))
    def handler_thread(self):
        """Used internally - reads from in_q and passes to the appropriate handler
 
