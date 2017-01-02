@@ -1,0 +1,15 @@
+""" AUTOMATICALLY GENERATED ON %%DATETIME%%
+
+    Implements %%PROTONAME%% protocol for socktools
+
+    Do not modify this file directly, instead modify this file:
+      %%SPECFILE%%
+    Then rebuild using gen_proto.py
+"""
+
+import eventlet
+eventlet.monkey_patch()
+
+%%IMPORTS%%
+
+%%PROTOCLASS%%

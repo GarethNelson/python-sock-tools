@@ -11,6 +11,7 @@ Contents
    overview
    modules
    examples
+   tools
 
 Indices and tables
 ==================

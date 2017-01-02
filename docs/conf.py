@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # ones.
 extensions = ['sphinx.ext.autodoc','sphinx.ext.napoleon',
     'sphinx.ext.todo',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode','sphinxarg.ext']
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
