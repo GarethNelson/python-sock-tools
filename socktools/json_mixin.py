@@ -28,9 +28,12 @@ eventlet.monkey_patch() # this should be done in all modules that use eventlet a
 class JSONParseMixin(object):
    """A mixin for parsing JSON messages
 
-   This class is most suited to the websocket server::
+   This class is most suited to the websocket server:
+   .. code-block:: python
+
        class MyClass(JSONParseMixIn,WSGIWebsocketSock):
-          pass
+             pass
+    
 
    If you do not add an actual socket, this class does nothing, it's a mixin.
    """
