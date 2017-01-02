@@ -44,6 +44,12 @@ Within the messages field you must provide a list of dictionary objects with the
  fields          list       A list of strings giving field names in this message type
 =============== ========== =======================================================================
 
+After generating your module, you can import it and subclass it to implement the handlers, each handler function will be passed the fields from the message.
+
+It is then up to you to either implement parse_msg() or add one of the mixins and finish off your protocol.
+
+For a simple example, run tools/example_chat.py - this will build a complete chat protocol and start the server
+
 .. toctree::
    :maxdepth: 4
 

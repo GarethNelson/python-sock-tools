@@ -1,4 +1,4 @@
-class %%PROTONAME%%Protocol(%%PROTOSOCK%%):
+class %%PROTONAME%%Protocol(%%MIXINS%%,%%PROTOSOCK%%):
    def get_default_handlers(self):
        return %%HANDLERS_DICT%%
    %%HANDLERS%%

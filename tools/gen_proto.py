@@ -49,21 +49,22 @@ def get_template_vars(specdata,filename):
               '%%PROTOSOCK%%':specdata['protocol_sock'],
               '%%SPECFILE%%': filename,
               '%%DATETIME%%':time.ctime().upper(),
+              '%%MIXINS%%':  ','.join(specdata['mixins']),
               '%%IMPORTS%%':'',
               '%%HANDLERS%%':''}
     for modname in specdata['imports']:
         retval['%%IMPORTS%%'] += ('import %s\n' % modname)
     msg_handlers_dict = {}
     for msg in specdata['messages']:
-        msg_handlers_dict[msg['msg_type_int']] = 'self._handle_%s' % msg['msg_type_str']
+        msg_handlers_dict[msg['msg_type_int']] = '[self._handle_%s]' % msg['msg_type_str']
         param_str = ''
         if specdata['named_fields']:
            param_str = ','.join(map(lambda x: x+'=None',msg['fields']))
-           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(self,**msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
+           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(self,from_addr,**msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
         else:
            param_str = ','.join(msg['fields'])
-           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(self,*msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
-        retval['%%HANDLERS%%'] += '\n   def handle_%s(self,%s):\n       pass' % (msg['msg_type_str'],param_str)
+           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(self,from_addr,*msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
+        retval['%%HANDLERS%%'] += '\n   def handle_%s(self,from_addr,%s):\n       pass' % (msg['msg_type_str'],param_str)
     msghandlers_str = repr(msg_handlers_dict)
     msghandlers_str = msghandlers_str.replace('u\'','')
     msghandlers_str = msghandlers_str.replace('\'','')

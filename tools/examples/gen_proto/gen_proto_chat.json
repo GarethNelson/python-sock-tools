@@ -1,11 +1,14 @@
 {"protocol_name":"Chat",
- "imports":["socktools.udp_sock"],
- "protocol_sock":"socktools.udp_sock.UDPSock",
+ "imports":["socktools.tcp_sock","socktools.json_mixin"],
+ "protocol_sock":"socktools.tcp_sock.TCPSock",
  "named_fields":true,
- "mixins":[],
+ "mixins":["socktools.json_mixin.JSONParseMixin"],
  "messages":[{"msg_type_str":"ping",
               "msg_type_int":0,
               "fields":["ping_id"]},
              {"msg_type_str":"pong",
               "msg_type_int":1,
-              "fields":["ping_id"]}]}
+              "fields":["ping_id"]},
+             {"msg_type_str":"msg",
+              "msg_type_int":2,
+              "fields":["msg_text"]}]}

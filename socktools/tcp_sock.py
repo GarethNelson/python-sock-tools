@@ -149,7 +149,7 @@ class TCPSock(base_sock.BaseSock):
                    except:
                       pass
                 else:
-                   self.recv_q.put((client_addr,msg_data))
+                   self.recv_q.put((msg_data,client_addr))
           except Exception,e:
              errmsg = 'Failed reading message from %s:%s' % (client_addr[0],client_addr[1])
              self.log_error(errmsg, exc=e)
