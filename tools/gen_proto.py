@@ -60,10 +60,10 @@ def get_template_vars(specdata,filename):
         param_str = ''
         if specdata['named_fields']:
            param_str = ','.join(map(lambda x: x+'=None',msg['fields']))
-           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(self,from_addr,**msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
+           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(from_addr,**msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
         else:
            param_str = ','.join(msg['fields'])
-           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(self,from_addr,*msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
+           retval['%%HANDLERS%%'] += '\n   def _handle_%s(self,from_addr,msg_type,msg_data):\n       self.handle_%s(from_addr,*msg_data)' % (msg['msg_type_str'],msg['msg_type_str'])
         retval['%%HANDLERS%%'] += '\n   def handle_%s(self,from_addr,%s):\n       pass' % (msg['msg_type_str'],param_str)
     msghandlers_str = repr(msg_handlers_dict)
     msghandlers_str = msghandlers_str.replace('u\'','')
