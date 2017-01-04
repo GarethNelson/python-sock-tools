@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 Python Sock tools: gen_proto.py - Generate a python module for parsing a custom protocol
 Copyright (C) 2016 GarethNelson
@@ -17,6 +16,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with python-sock-tools.  If not, see <http://www.gnu.org/licenses/>.
+
+
+This module is intended to be run as a command-line tool primarily, though a python API is also available.
 """
 
 import eventlet
@@ -25,6 +27,13 @@ import json
 import time
 
 def get_parser():
+    """Get a command-line parser for this tool
+
+    This function simply returns a parser object from argparse, it is here only to make generating documentation simpler.
+
+    Returns:
+       argparse.ArgumentParser: The populated argument parser
+    """
     parser = argparse.ArgumentParser(description='Autogenerate a python module that implements a custom protocol')
     parser.add_argument('-s','--specfile',type=str,help='The specification file to use',required=True)
     parser.add_argument('-t','--template',type=str,help='The location of the templates directory to use')
@@ -32,12 +41,35 @@ def get_parser():
     return parser
 
 def load_json_file(path):
+    """Load and parse a JSON file
+
+    Loads a JSON file from disk and attempts to parse it at the same time - a simple convenience wrapper around json.load().
+    No exception handling is done, it is up to the caller to wrap in a try block if required.
+    
+    Args:
+      path (str): Path to the JSON file needing to be loaded, this should usually be an absolute path
+
+    Returns:
+      object.object: The toplevel object parsed from the file, usually this is a dict or a list
+    """
     json_fd = open(path,'r')
     retval = json.load(json_fd)
     json_fd.close()
     return retval
 
 def load_template(path,template_name):
+    """Load a single template
+
+    Loads a single template file into memory, like load_json_file() this is primarily a simple convenience wrapper that handles opening and reading the full contents of a file.
+    No exception handling is done, it is up to the caller to wrap in a try block if required.
+
+    Args:
+      path (str): The path to the directory containing the template file
+      template_name (str): The name of the template to load
+
+    Returns:
+      str: The contents of the template file, in future this might be some sort of template object instead
+    """
     template_filename = os.path.join(path,template_name)
     fd = open(template_filename,'r')
     retval = fd.read()
@@ -45,6 +77,17 @@ def load_template(path,template_name):
     return retval
 
 def get_template_vars(specdata,filename):
+    """Get the template variables and their default values
+
+    Evaluates the data from a specification file and uses it to build a dict of variables and their substitution values.
+
+    Args:
+       specdata (dict): The toplevel object from the specification file as loaded from load_json_file()
+       filename (str): The absolute path to the specification file
+
+    Returns:
+       dict: A dict mapping %%VARIABLE%% tokens to the strings they should be replaced with
+    """
     retval = {'%%PROTONAME%%':specdata['protocol_name'],
               '%%PROTOSOCK%%':specdata['protocol_sock'],
               '%%SPECFILE%%': filename,
@@ -72,11 +115,30 @@ def get_template_vars(specdata,filename):
     return retval
 
 def load_templates(path):
-    retval = {'module':load_template(path,"module"),
+    """Loads default templates
+    
+    A simple wrapper around load_template that loads all the default templates needed
+
+    Args:
+      path (str): The absolute path to the templates directory
+
+    Returns:
+      dict: A dict mapping the template name to the contents
+    """
+    retval = {'module':load_template(path,'module'),
               'protoclass':load_template(path,'protoclass')}
     return retval
 
 def render_module(specfile_path,template_path,output_path):
+    """Renders the generated python module
+    
+    This is where the real work happens - this function loads the specification file and templates then renders the module and writes it to disk.
+
+    Args:
+      specfile_path (str): Absolute path to the specification file
+      template_path (str): Absolute path to the templates directory
+      output_path   (str): Absolute path to the output file to create
+    """
     specdata      = load_json_file(specfile_path)
     templates     = load_templates(template_path)
     template_vars = get_template_vars(specdata,specfile_path)

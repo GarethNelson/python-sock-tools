@@ -11,7 +11,7 @@ Contents
    overview
    modules
    examples
-   tools
+   socktools.tools
 
 Indices and tables
 ==================

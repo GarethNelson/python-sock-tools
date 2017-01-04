@@ -12,7 +12,7 @@ Usage
 -----
 
 .. argparse::
-   :module: tools.gen_proto
+   :module: socktools.tools.gen_proto
    :func: get_parser
    :prog: gen_proto.py
 
@@ -49,6 +49,15 @@ After generating your module, you can import it and subclass it to implement the
 It is then up to you to either implement parse_msg() or add one of the mixins and finish off your protocol.
 
 For a simple example, run tools/example_chat.py - this will build a complete chat protocol and start the server
+
+Python API
+----------
+
+.. automodule:: socktools.tools.gen_proto
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 .. toctree::
    :maxdepth: 4
