@@ -23,3 +23,10 @@ Utility mixins
    socktools.json_mixin
    socktools.msgpack_mixin
    socktools.tcp_linemode_mixin
+
+Daemons and servers
+-------------------
+
+.. toctree::
+   socktools.daemon.base_daemon
+   socktools.daemon.cron_timer
