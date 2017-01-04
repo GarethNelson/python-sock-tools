@@ -21,4 +21,5 @@ Utility mixins
 .. toctree::
    socktools.msgtype_mixin
    socktools.json_mixin
+   socktools.msgpack_mixin
    socktools.tcp_linemode_mixin

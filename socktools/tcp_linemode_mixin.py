@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with python-sock-tools.  If not, see <http://www.gnu.org/licenses/>.
 
-This module implements a mixin that implements the parse_msg() method using JSON. Messages are assumed to be JSON lists of (msg_type,msg_data).
+This module enables reading from TCP sockets line by line, it is used by the example simple_chat.py
 
 """
 
