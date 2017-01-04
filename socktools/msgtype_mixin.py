@@ -89,8 +89,10 @@ class _msgtype_sender:
        to_peer = None
        if kwargs.has_key('to_peer'):
           to_peer = kwargs['to_peer']
-       data = self.sock.encode_msg(to_peer,self.msg_type,args,kwargs)
-       self.sock.send_raw(data,to_peer=to_addr)
+       if len(args)>0:
+          self.sock.send_msg(self.msg_type,args,to_peer=to_peer)
+          return
+       self.sock.send_msg(self.msg_type,kwargs,to_peer=to_peer)
 
 class MsgtypeSendMixin(object):
    """A mixin that adds send_MSGTYPE methods to the socket
@@ -104,7 +106,7 @@ class MsgtypeSendMixin(object):
    
    If everything works the object will magically acquire a bunch of send_MSGTYPE methods: 1 per msg_types entry. Note that for performance reasons this is NOT dynamic.
 
-   The send_MSGTYPE methods will pass all of their arguments to encode_msg().
+   The send_MSGTYPE methods will pass all of their arguments to send_msg()
 
    """
    def child_setup(self):
@@ -116,24 +118,5 @@ class MsgtypeSendMixin(object):
        for k,v in self.msg_types.items():
            setattr(self,'send_%s' % k,_msgtype_sender(v,self))
        super(MsgtypeSendMixin,self).child_setup()
-   def encode_msg(self,addr,msg_type,args,kwargs):
-       """Encode a message for transmission, used by the send_MSGTYPE methods
-       
-       The default implementation of this method dumps args and kwargs into a dict then "serialises" it using str(). This is stupid on purpose - you are encouraged to write your own encode_msg or use another mixin.
-       
-       Note:
-         It is not sensible to implement application logic in this method - it should deal with encoding only.
-       
-       Args:
-         addr (tuple): the TCP/IP endpoint the message is headed for - this is usually not required but some protocols may need to reference it in some manner when encoding
-         msg_type: the message type after being looked up in self.msg_types
-         args (tuple): the positional arguments sent to the send_MSGTYPE method
-         kwargs (dict): the keyword arguments sent to the send_MSGTYPE method
-
-       Returns:
-         str: the encoded message ready for transmission
-       """
-       # this is terrible and stupid
-       return str({'args':args,'kwargs':kwargs})
 
 

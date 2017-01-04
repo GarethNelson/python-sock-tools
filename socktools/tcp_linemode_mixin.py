@@ -30,6 +30,18 @@ class TCPLinemodeMixin(object):
    When implementing line-based protocols over TCP, use this mixin
 
    """
+   def encode_msg(self,data):
+       """Identity function
+
+       Since we don't need a length prefix when in line-by-line mode this method is just an identity function
+
+       Args:
+          data (str): The raw message
+
+       Returns:
+          str: The raw message
+       """
+       return data
    def do_real_read(self,s):
        """Read messages from a socket by reading lines
        

@@ -31,6 +31,21 @@ class MsgpackParseMixin(object):
    
    See http://msgpack.org/ for details
    """
+   def serialise_msg(self,msg_type,msg_data):
+       """Serialise a msgpack message
+
+       Similar to the JSON mixin, this method serialises messages as msgpack lists of (msg_type,msg_data)
+
+       Args:
+          msg_type (int): the message type as an integer
+          msg_data (dict): usually a dict, the actual message contents
+
+       Returns:
+          str: the msgpack encoded message
+       """
+       pack_data   = (msg_type,msg_data)
+       encoded_msg = msgpack.packb(pack_data)
+       return str(encoded_msg)
    def parse_msg(self,data):
        """Parse a raw msgpack message
 

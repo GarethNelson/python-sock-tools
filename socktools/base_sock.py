@@ -193,6 +193,7 @@ class BaseSock(object):
              eventlet.greenthread.sleep(0)
              try:
                 data,addr = self.read_raw()
+                data = self.decode_msg(data) # decode it if needed
              except Exception,e:
                 self.log_error('Error reading from socket',exc=e)
              if not (data is None):
@@ -371,6 +372,70 @@ class BaseSock(object):
        """
        return self.sock.recvfrom(8192)
 
+   def serialise_msg(self,msg_type,msg_data):
+       """Serialise a single message
+
+       This method is where you should implement your message serialisation code for custom protocols.
+
+       In the default implementation this function just returns str(msg_data)
+
+       Args:
+          msg_type (int): the message type
+          msg_data:       a python object to be serialised into a message
+
+       Returns:
+          str: the serialised message
+       """
+       return str(msg_data)
+
+   def encode_msg(self,data):
+       """Encode a serialised message
+
+       This method is where you should implement any form of encoding required by the physical socket including things such as prefixing a length for TCP sockets.
+
+       You may also handle compression,encryption etc here.
+
+       In the default implementation this is an identity function.
+
+       Args:
+          data (str): the message serialised as a string
+
+       Returns:
+          str: the encoded message
+       """
+       return data
+
+   def decode_msg(self,data):
+       """Used internally - decodes raw messages
+
+       If encode_msg() is implemented, this should do the inverse
+
+       Args:
+          data (str): the message serialised as a string and still encoded
+
+       Returns:
+          str: the decoded but still serialised message
+       """
+       return data
+
+   def send_msg(self,msg_type,msg_data,to_peer=None):
+       """Encode and then send a single message to the specified peer
+
+       This method encodes and then sends a single message to the specified peer, or optionally to all connected peers.
+
+       Args:
+          msg_type (int): the type of message to send
+          msg_data: format depends on the application, usually a tuple, list or dict
+       
+       Note:
+          This method relies upon the serialise_msg() method and the encode_msg() method - please ensure these methods are defined appropriately
+
+       Keyword args:
+          to_peer (tuple): the TCP/IP endpoint as a (host,ip) tuple to transmit to, if this is set to None then all peers will get the message
+       """
+       serialised_msg = self.serialise_msg(msg_type,msg_data)
+       encoded_msg    = self.encode_msg(serialised_msg)
+       self.send_raw(encoded_msg,to_peer=to_peer)
    def send_raw(self,data,to_peer=None):
        """Send a single raw packet from the socket to the specified peer
 

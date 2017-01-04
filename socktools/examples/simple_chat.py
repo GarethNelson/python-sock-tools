@@ -30,6 +30,8 @@ eventlet.monkey_patch() # this should be done in all modules that use eventlet a
 from socktools import tcp_sock
 from socktools import tcp_linemode_mixin
 
+MSGTYPE_LINE = 0
+
 class ChatProtocol(tcp_linemode_mixin.TCPLinemodeMixin,tcp_sock.TCPSock):
    """Multiuser chat implementation
    
@@ -48,7 +50,7 @@ class ChatProtocol(tcp_linemode_mixin.TCPLinemodeMixin,tcp_sock.TCPSock):
           dict: the message handlers dict, updated to configure message type 0 so it calls handle_msg
        """
        handlers = super(ChatProtocol,self).get_default_handlers() # it's good practice to add the default handlers from upstream, even though it's pointless in this particular example
-       handlers[0] = [self.handle_msg]
+       handlers[MSGTYPE_LINE] = [self.handle_msg]
        return handlers
    def handle_msg(self,from_addr,msg_type,msg_data):
        """ Handler for message type 0
@@ -57,7 +59,7 @@ class ChatProtocol(tcp_linemode_mixin.TCPLinemodeMixin,tcp_sock.TCPSock):
 
        This method is also gloriously simple - it just broadcasts msg_data to all other connected clients.
        """
-       self.send_raw(msg_data)
+       self.send_msg(MSGTYPE_LINE,msg_data)
 
        
    def handle_all(self,from_addr,msg_type,msg_data):

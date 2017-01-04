@@ -35,21 +35,6 @@ import base_sock
 import socket
 import struct
 
-def encode_str(s):
-    """ Utility function to encode the length prefix
-
-    This function takes a string and prefixes it with a length.
-
-    Args:
-      s (str): The string to prefix
-
-    Returns:
-      str: The string, prefixed with the length
-    """
-    s_len      = len(s)
-    len_prefix = struct.pack('>I',s_len)
-    return '%s%s' % (len_prefix,s)
-
 class TCPSock(base_sock.BaseSock):
    """ Simple TCP implementation - both client and server
 
@@ -129,6 +114,24 @@ class TCPSock(base_sock.BaseSock):
        msg_len   = struct.unpack('>I',msg_len_s)[0]
        msg_data  = s.recv(msg_len)
        return msg_data
+
+   def encode_msg(self,data):
+       """Used to encode the length prefix in messages
+
+       This should be overridden if you override do_real_read() and/or decode_msg().
+
+       In the default implementation, a 32-bit unsigned integer representing the data length is prefixed
+
+       Args:
+          data (str): the data to encode
+
+       Returns:
+          str: the data with a length prefix
+       """
+       data_len      = len(data)
+       len_prefix = struct.pack('>I',data_len)
+       return '%s%s' % (len_prefix,data)
+
 
    def handle_client(self,client_addr,client_sock):
        """Used internally - reads messages from clients and passes them off to be read
