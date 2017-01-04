@@ -6,6 +6,7 @@ Core modules
 
 .. toctree::
    socktools.base_sock
+   socktools.meta_sock
 
 Socket implementations
 ----------------------

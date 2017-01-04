@@ -65,6 +65,7 @@ class BaseSock(object):
       timeout (int):        time in seconds before a peer is considered to have timed out
       tick_interval (int):  time in seconds to wait between ticks
       sock (socket.socket): if not None, specifies a socket object to be used - should be used only for testing
+      meta_sock (meta_sock.MetaSock): if not None, specifies the meta socket this socket belongs to, see meta_sock.py
 
    Attributes:
       known_peers (dict):                  all currently connected peers have an entry in this dict, the contents of the dict are another dict with metadata
@@ -75,9 +76,10 @@ class BaseSock(object):
       tick_interval (int):                 the tick interval - what exactly a tick does is up to the application
       handlers (dict):                     maps message types to list of message handler functions
       sock:                                arbitrary object representing the physical socket, defaults to an instance of DummySocket
+      meta_sock:                           see meta_sock.py
       active (bool):                       indicates whether this socket is active and working
    """
-   def __init__(self,bind=None,connect=None,handlers={},timeout=10,tick_interval=0.25,sock=None):
+   def __init__(self,bind=None,connect=None,handlers={},timeout=10,tick_interval=0.25,sock=None,meta_sock=None):
        self.known_peers = {}
        self.pool        = eventlet.GreenPool(1000)
        if not (sock is None):
@@ -90,6 +92,7 @@ class BaseSock(object):
        self.in_q          = eventlet.queue.LightQueue(100) # parsed packets ready to be handled
        self.timeout       = timeout
        self.tick_interval = tick_interval
+       self.meta_sock     = meta_sock
        if not (bind is None):    self.sock.bind(bind)
        if not (connect is None): self.connect_to(connect)
        self.child_setup()
@@ -210,6 +213,10 @@ class BaseSock(object):
           while ((msg_data is None) and self.active):
             eventlet.greenthread.sleep(0)
             addr,msg_type,msg_data = self.in_q.get()
+            if not (self.meta_sock is None):
+               self.meta_sock.add_msg(self,addr,msg_type,msg_data)
+               if self.meta_sock.override_mode:
+                  continue
             if self.handlers.has_key(msg_type):
                for handler in self.handlers[msg_type]:
                    self.pool.spawn_n(self.handler_wrapper,handler,addr,msg_type,msg_data)
