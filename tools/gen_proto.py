@@ -76,6 +76,22 @@ def load_templates(path):
               'protoclass':load_template(path,'protoclass')}
     return retval
 
+def render_module(specfile_path,template_path,output_path):
+    specdata      = load_json_file(specfile_path)
+    templates     = load_templates(template_path)
+    template_vars = get_template_vars(specdata,specfile_path)
+    for x in xrange(2):
+        for k,v in templates.items():
+            for var_k,var_v in template_vars.items():
+                if var_k in v:
+                   templates[k] = templates[k].replace(var_k,var_v)
+            for t_k,t_v in templates.items():
+                if ('%%%%%s%%%%' % t_k.upper()) in v:
+                   templates[k] = templates[k].replace('%%%%%s%%%%' % t_k.upper(),templates[t_k])
+    output_fd = open(output_path,'w')
+    output_fd.write(templates['module'])
+    output_fd.close()
+
 if __name__=='__main__':
    import os
    
@@ -84,25 +100,11 @@ if __name__=='__main__':
       template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'templates')
    else:
       template_path = args.template
-   print 'Loading specification from %s' % os.path.abspath(args.specfile)
-   specdata  = load_json_file(os.path.abspath(args.specfile))
-   print 'Loading templates from %s' % template_path
-   templates = load_templates(template_path)
+
+   specfile_path = os.path.abspath(args.specfile)
+   output_path   = os.path.abspath(args.output)
    
-   template_vars = get_template_vars(specdata,os.path.abspath(args.specfile))
-
-   print 'Rendering templates'
-   for x in xrange(2):
-       for k,v in templates.items():
-           for var_k,var_v in template_vars.items():
-               if var_k in v:
-                  templates[k] = templates[k].replace(var_k,var_v)
-           for t_k,t_v in templates.items():
-               if ('%%%%%s%%%%' % t_k.upper()) in v:
-                  templates[k] = templates[k].replace('%%%%%s%%%%' % t_k.upper(),templates[t_k])
-
-   output_file = open(args.output,'w')
-   output_file.write(templates['module'])
-
+   print 'Rendering specification file %s to %s using templates in %s' % (specfile_path,output_path,template_path)
+   render_module(specfile_path,template_path,output_path)
 
 
