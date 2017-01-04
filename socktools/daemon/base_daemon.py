@@ -45,15 +45,15 @@ class BaseDaemon:
 
    Keyword args:
       pidfile (str): Path to the PID file the daemon will use
-      stdin (str):   Path to the stdin device - normally /dev/null but could be /dev/stdin in theory
+      stdin (str):   Path to the stdin device to use
       stdout (str):  Path to the stdout device
       stderr (str):  Path to the stderr device
    """
    def __init__(self,pidfile='./daemon.pid',stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
        self.pidfile = os.path.abspath(pidfile)
-       self.stdin   = stdin
-       self.stdout  = stdout
-       self.stderr  = stderr
+       self.stdin   = os.path.abspath(stdin)
+       self.stdout  = os.path.abspath(stdout)
+       self.stderr  = os.path.abspath(stderr)
        self.active  = False
        self.logger  = None
        self.logger  = self.get_logger()
@@ -66,7 +66,6 @@ class BaseDaemon:
        Returns:
          logging.Logger: the logger
        """
-       if not (self.logger is None): return self.logger
        self.logger = logging.getLogger(sys.argv[0])
        if not self.logger.handlers:
           self.logger.setLevel(logging.DEBUG)
@@ -195,7 +194,8 @@ class BaseDaemon:
        This method is where the actual server (or whatever) code goes. The default implementation just runs eventlet.greenthread.sleep(3600) in an infinite loop.
        The default implementation also spits out a log entry once per hour.
        """
-       while True:
+       while self.active:
+          self.get_logger().info('Default run() is spitting this message out')
           eventlet.greenthread.sleep(3600)
 
    def handle_hup(self,signum,frame):
@@ -237,11 +237,13 @@ class BaseDaemon:
        
        pid = os.getpid()
 
-       self.pre_stdout() # display any startup messages
+       self.pre_stdout(pid=pid) # display any startup messages
 
        # write to the PID file
-       pidfile_fd = open(self.pidfile,'w+')
+       pidfile_fd = file(self.pidfile,'w+')
        pidfile_fd.write('%s\n' % str(pid))
+       pidfile_fd.flush()
+       pidfile_fd.close()
 
        # redirect file descriptors
        _stdin   = file(self.stdin,  'r')
@@ -256,6 +258,9 @@ class BaseDaemon:
 
        # register SIGHUP handler
        signal.signal(signal.SIGHUP, self.handle_hup)
+
+       # mark us as active
+       self.active = True
 
        # run the actual server code or whatever
        self.run()
@@ -279,6 +284,7 @@ class BaseDaemon:
        Call this method to stop the daemon (even if it's in another process). If the daemon is not running this method does nothing.
        """
        if not self.is_running(): return
+       self.active = False
        daemon_pid = self.get_pid()
        while True:
           try:
