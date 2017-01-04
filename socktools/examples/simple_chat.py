@@ -28,8 +28,9 @@ import eventlet
 eventlet.monkey_patch() # this should be done in all modules that use eventlet as the first import, just in case
 
 from socktools import tcp_sock
+from socktools import tcp_linemode_mixin
 
-class ChatProtocol(tcp_sock.TCPSock):
+class ChatProtocol(tcp_linemode_mixin.TCPLinemodeMixin,tcp_sock.TCPSock):
    """Multiuser chat implementation
    
    Protocols in socktools are either classes that inherit from a socket or mixins that can be added to another application-specific class later along with the socket.
@@ -69,19 +70,7 @@ class ChatProtocol(tcp_sock.TCPSock):
        new_data = '<%s:%s> %s' % (from_addr[0],from_addr[1],msg_data)
        return (from_addr,msg_type,new_data)
 
-   def do_real_read(self,s):
-       """Read messages from a socket by reading lines
-       
-       Args:
-          s (socket.socket): the underlying physical socket to read from
-       
-       Returns:
-          str: a single line read from that socket
-       """
-       addr = s.getpeername()
-       if not self.known_peers[addr].has_key('fd'):
-          self.known_peers[addr]['fd'] = s.makefile()
-       return self.known_peers[addr]['fd'].readline()
+
 
 
 if __name__=='__main__':
