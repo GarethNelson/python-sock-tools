@@ -48,7 +48,18 @@ After generating your module, you can import it and subclass it to implement the
 
 It is then up to you to either implement parse_msg() or add one of the mixins and finish off your protocol.
 
-For a simple example, run tools/example_chat.py - this will build a complete chat protocol and start the server
+Examples
+--------
+
+These examples can be run from the command line:
+
+.. code-block:: shell
+
+    python -m socktools.tools.examples.gen_proto.build_example_chat
+
+.. toctree::
+   socktools.tools.examples.gen_proto.build_example_chat
+   socktools.tools.examples.gen_proto.chat_server
 
 Python API
 ----------

@@ -25,6 +25,7 @@ import eventlet
 import argparse
 import json
 import time
+import os
 
 def get_parser():
     """Get a command-line parser for this tool
@@ -129,6 +130,16 @@ def load_templates(path):
               'protoclass':load_template(path,'protoclass')}
     return retval
 
+def get_default_template_path():
+    """Calculates the default templates path
+    
+    This function is provided as a convenience for users of the Python API, such as build_example_chat.py
+
+    Returns:
+       str: The default templates path
+    """
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)),'templates')
+
 def render_module(specfile_path,template_path,output_path):
     """Renders the generated python module
     
@@ -155,11 +166,10 @@ def render_module(specfile_path,template_path,output_path):
     output_fd.close()
 
 if __name__=='__main__':
-   import os
    
    args = get_parser().parse_args()
    if args.template is None:
-      template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'templates')
+      template_path = get_default_template_path()
    else:
       template_path = args.template
 
