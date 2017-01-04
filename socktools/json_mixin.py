@@ -38,7 +38,7 @@ class JSONParseMixin(object):
           pass
    
    """
-   def serialise_msg(self,msg_type,msg_data)
+   def serialise_msg(self,msg_type,msg_data):
        """Serialise a message in JSON format
 
        This method serialises msg_data (which should be a dict or sequence) into a JSON list object of (msg_type,msg_data).
