@@ -24,6 +24,7 @@ Note:
 import eventlet
 import generated
 import json
+from socktools import tcp_sock
 
 class ChatHandlers(generated.ChatProtocol):
    """ Server implementation for the chat protocol
@@ -45,7 +46,7 @@ class ChatHandlers(generated.ChatProtocol):
        
        """
        pong_data = json.dumps([1,{'ping_id':ping_id}])
-       self.send_raw(pong_data,to_peer = from_addr)
+       self.send_raw(tcp_sock.encode_str(pong_data),to_peer = from_addr)
 
    def handle_msg(self,from_addr,msg_text=None):
        """Handle chat messages
@@ -58,8 +59,8 @@ class ChatHandlers(generated.ChatProtocol):
        Keyword args:
          msg_text (str): The text of the message
        """
-       msg_data = json.dumps([2,{'msg_text':'%s said %s ' % (from_addr,msg_text)}])
-       self.send_raw(msg_data)
+       msg_data = json.dumps([2,{'msg_text':'<%s:%s> %s' % (from_addr[0],from_addr[1],msg_text)}])
+       self.send_raw(tcp_sock.encode_str(msg_data))
 
 if __name__=='__main__':
    chat = ChatHandlers(bind=('127.0.0.1',31337))

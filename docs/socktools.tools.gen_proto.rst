@@ -60,6 +60,7 @@ These examples can be run from the command line:
 .. toctree::
    socktools.tools.examples.gen_proto.build_example_chat
    socktools.tools.examples.gen_proto.chat_server
+   socktools.tools.examples.gen_proto.chat_client
 
 Python API
 ----------

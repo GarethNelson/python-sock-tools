@@ -35,6 +35,21 @@ import base_sock
 import socket
 import struct
 
+def encode_str(s):
+    """ Utility function to encode the length prefix
+
+    This function takes a string and prefixes it with a length.
+
+    Args:
+      s (str): The string to prefix
+
+    Returns:
+      str: The string, prefixed with the length
+    """
+    s_len      = len(s)
+    len_prefix = struct.pack('>I',s_len)
+    return '%s%s' % (len_prefix,s)
+
 class TCPSock(base_sock.BaseSock):
    """ Simple TCP implementation - both client and server
 
@@ -216,7 +231,7 @@ class TCPSock(base_sock.BaseSock):
          endpoint (tuple): the TCP/IP endpoint as (ip,port)
        """
        
-       if not self.hasattr('recv_q'): self.recv_q = eventlet.queue.LightQueue(100)
+       self.recv_q = eventlet.queue.LightQueue(100)
        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
        s.connect(endpoint)
        self.pool.spawn_n(self.handle_client,endpoint,s)
