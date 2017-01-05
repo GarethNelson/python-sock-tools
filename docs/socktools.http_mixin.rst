@@ -1,10 +1,10 @@
-socktools.http_mixin
-====================
+socktools.http_mixin - toy HTTP implementation
+==============================================
 
 Overview
 --------
 
-This is a simple implementation of HTTP for demonstration purposes, if you need a webserver for production use, use the one from eventlet.wsgi.
+This is a simple implementation of HTTP for demonstration purposes, if you need a webserver for production use, see webwrap.py.
 
 Python API
 ----------

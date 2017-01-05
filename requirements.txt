@@ -3,3 +3,4 @@ dnslib>=0.9.6
 sphinx-argparse>=0.1.15
 sphinx-rtd-theme>=0.1.9
 msgpack-python>=0.4.8
+web.py>=0.37

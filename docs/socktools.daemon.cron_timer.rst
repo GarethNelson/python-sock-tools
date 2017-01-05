@@ -1,5 +1,5 @@
-socktools.daemon.cron_timer
-===========================
+socktools.daemon.cron_timer - cron-like timers for daemons
+==========================================================
 
 .. automodule:: socktools.daemon.cron_timer
     :members:

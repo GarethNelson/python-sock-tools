@@ -1,5 +1,5 @@
-socktools.base_sock
-===================
+socktools.base_sock - base socket implementation
+================================================
 
 .. automodule:: socktools.base_sock
     :members:

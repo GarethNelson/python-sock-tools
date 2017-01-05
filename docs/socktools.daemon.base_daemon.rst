@@ -1,5 +1,5 @@
-socktools.daemon.base_daemon
-============================
+socktools.daemon.base_daemon - UNIX daemon basic implementation
+===============================================================
 
 .. automodule:: socktools.daemon.base_daemon
     :members:

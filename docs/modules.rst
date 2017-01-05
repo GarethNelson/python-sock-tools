@@ -26,6 +26,12 @@ Utility mixins
    socktools.tcp_linemode_mixin
    socktools.http_mixin
 
+Embedded webserver
+------------------
+
+.. toctree::
+   socktools.webwrap
+
 Daemons and servers
 -------------------
 

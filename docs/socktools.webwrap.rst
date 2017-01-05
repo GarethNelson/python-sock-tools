@@ -1,7 +1,7 @@
-socktools.udp_sock - UDP implementation
+socktools.webwrap - web.py WSGI wrapper
 =======================================
 
-.. automodule:: socktools.udp_sock
+.. automodule:: socktools.webwrap
     :members:
     :undoc-members:
     :show-inheritance:
