@@ -24,6 +24,7 @@ Utility mixins
    socktools.json_mixin
    socktools.msgpack_mixin
    socktools.tcp_linemode_mixin
+   socktools.http_mixin
 
 Daemons and servers
 -------------------

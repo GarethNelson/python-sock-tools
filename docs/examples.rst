@@ -24,3 +24,4 @@ The following examples show how to implement various web services and similar.
 
 .. toctree::
    socktools.examples.ws_dumper
+   socktools.examples.simple_http
