@@ -38,7 +38,7 @@ import os
 import errno
 import signal
 
-class BaseDaemon:
+class BaseDaemon(object):
    """ The base daemon class from which others inherit
 
    This class can be used directly in theory, but it makes more sense to inherit from it or use one of the other daemon classes.

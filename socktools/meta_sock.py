@@ -40,10 +40,33 @@ class MetaSock(base_sock.BaseSock):
 
    Keyword args:
       override_mode (bool): if True, the child sockets will not process messages and instead defer to the meta socket
+      child_sockets (list): a list of child sockets to add at startup
    """
-   def __init__(self,override_mode=False,**kwargs):
+   def __init__(self,override_mode=False,child_sockets=[],**kwargs):
        self.override_mode = override_mode
+       self.child_sockets = self.get_default_child_sockets()
+       for sock in self.child_sockets:
+           self.child_sockets.append(sock)
+       self.update_child_socks()
        super(MetaSock,self).__init__(**kwargs)
+   def update_child_socks(self):
+       """ Update the meta_sock variable in children
+       
+       This should be called after adding new child socks
+       
+       """
+       for sock in self.child_sockets:
+           sock.meta_sock = self
+   def get_default_child_sockets(self):
+       """ Return a list of default child sockets
+       
+       This method is provided for the sake of a uniform API, in most cases you can do what you need to without subclassing.
+
+       In the default implementation this returns a 0-length list.
+       
+       """
+       return []
+
    def parser_thread(self):
        """ We do nothing here, nothing at all
        """
@@ -75,6 +98,26 @@ class MetaSock(base_sock.BaseSock):
           handler(child_sock,addr,msg_type,msg_data)
        except Exception,e:
           self.log_error('Handler for message type %s failed' % msg_type,exc=e)
+   def send_msg(self,msg_type,msg_data,to_peer=None):
+       """ Broadcasts a message to all child sockets
+       
+       It is up to the child socket classes to properly encode the message.
+       
+       The to_peer param is ignored and present only for compatiblity reasons.
+       
+       """
+       for sock in self.child_sockets:
+           sock.send_msg(msg_type,msg_data)
+   def send_raw(self,data,to_peer=None):
+       """ Broadcast a raw message to all child sockets
+
+       As with send_msg(), to_peer is for compatiblity reasons only and is ignored.
+
+       Warning:
+          It is advised to use send_msg() instead of this method due to the possiblity of underlying protocol differences
+       """
+       for sock in self.child_sockets:
+           sock.send_raw(data)
    def handler_thread(self):
        """ Async invoke handlers - used internally
        
