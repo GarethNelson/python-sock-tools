@@ -62,5 +62,5 @@ def start():
     The default location for the pid file is in ~/.geekircd.pid
     """
     pidfile_path = os.path.join(os.path.expanduser('~'),'.geekircd.pid')
-    geekircd = GeekIRCDaemon()
+    geekircd = GeekIRCDaemon(pidfile=pidfile_path)
     geekircd.handle_rc()

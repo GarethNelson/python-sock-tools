@@ -247,7 +247,7 @@ class BaseDaemon(object):
 
        # redirect file descriptors
        _stdin   = file(self.stdin,  'r')
-       _stdout  = file(self.stdout, 'a+')
+       _stdout  = file(self.stdout, 'a+', 0)
        _stderr  = file(self.stderr, 'a+', 0)
        os.dup2(_stdin.fileno(), sys.stdin.fileno())
        os.dup2(_stdout.fileno(), sys.stdout.fileno())
