@@ -33,13 +33,7 @@ class MetaChat(meta_sock.MetaSock):
 
    This meta socket handles rebroadcasting of messages to interested parties across multiple protocols.
 
-   Each underlying child socket must support the PRIVMSG message type and be able to handle it appropriately. The message is assumed to be a list of (Source,Target,MsgText).
-
-   Source is a full IRC hostmask, for example: :Gareth!~gareth@localhost
-
-   Target is an IRC-format target, a nick or a channel name for example.
-
-   MsgText is the actual message.
+   Each underlying child socket must support the PRIVMSG message type and be able to handle it appropriately. The message is assumed to be a dict as seen in irc_sock.py
 
    No security checks are done, which means anyone can send a message to any channel on IRC.
    """
@@ -57,9 +51,10 @@ class MetaChat(meta_sock.MetaSock):
        We simply rebroadcast to the target set
 
        """
-       source  = msg_data[0]
-       target  = msg_data[1]
-       msgtext = msg_data[2]
+       self.log_debug('Got a PRIVMSG: %s' % msg_data)
+       source  = msg_data['source']
+       target  = msg_data['target']
+       msgtext = msg_data['msgtext']
        if self.targets.has_key(target):
           for t in self.targets[target]:
               t_sock,t_addr = t
@@ -67,4 +62,4 @@ class MetaChat(meta_sock.MetaSock):
               t_sock.send_msg('PRIVMSG',outdata,to_peer = t_addr)
               
    def get_default_handlers(self):
-       return {'PRIVMSG':self.handle_privmsg}
+       return {'PRIVMSG':[self.handle_privmsg]}

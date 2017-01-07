@@ -38,6 +38,7 @@ import os
 import errno
 import signal
 
+
 class BaseDaemon(object):
    """ The base daemon class from which others inherit
 
@@ -55,7 +56,6 @@ class BaseDaemon(object):
        self.stdout  = os.path.abspath(stdout)
        self.stderr  = os.path.abspath(stderr)
        self.active  = False
-       self.logger  = None
        self.logger  = self.get_logger()
 
    def get_logger(self):
@@ -68,9 +68,9 @@ class BaseDaemon(object):
        """
        self.logger = logging.getLogger(sys.argv[0])
        if not self.logger.handlers:
-          self.logger.setLevel(logging.DEBUG)
           handler     = logging.handlers.SysLogHandler(address='/dev/log')
           self.logger.addHandler(handler)
+       self.logger.setLevel(logging.DEBUG)
        return self.logger
 
    def handle_rc(self,argv=sys.argv):
@@ -252,7 +252,8 @@ class BaseDaemon(object):
        os.dup2(_stdin.fileno(), sys.stdin.fileno())
        os.dup2(_stdout.fileno(), sys.stdout.fileno())
        os.dup2(_stderr.fileno(), sys.stderr.fileno())
-      
+
+
        # register atexit handler
        atexit.register(self.atexit_handler)
 

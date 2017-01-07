@@ -26,6 +26,7 @@ eventlet.monkey_patch()
 import socket
 import traceback
 import time
+import logging
 
 class DummySocket(socket.socket):
    """ A socket object that does nothing
@@ -77,10 +78,12 @@ class BaseSock(object):
       handlers (dict):                     maps message types to list of message handler functions
       sock:                                arbitrary object representing the physical socket, defaults to an instance of DummySocket
       meta_sock:                           see meta_sock.py
+      logger (logging.logger):             the logger to use for this socket
       active (bool):                       indicates whether this socket is active and working
    """
-   def __init__(self,bind=None,connect=None,handlers={},timeout=10,tick_interval=0.25,sock=None,meta_sock=None):
+   def __init__(self,bind=None,connect=None,handlers={},timeout=10,tick_interval=0.25,sock=None,meta_sock=None,logger=None):
        self.known_peers = {}
+       self.logger      = logger
        self.pool        = eventlet.GreenPool(1000)
        if not (sock is None):
           self.sock = sock
@@ -101,6 +104,17 @@ class BaseSock(object):
        for x in xrange(10): self.pool.spawn_n(self.handler_thread)
        self.pool.spawn_n(self.recv_thread)
        self.pool.spawn_n(self.timeout_thread)
+   def setup_logger(self,logger):
+       """Setup a logger object to use instead of stdout
+
+       Often it makes sense to log stuff to a logger object instead of dumping it to stdout using print.
+       This is especially useful for daemon processes where you may otherwise not see the output at all.
+
+       Args:
+          logger (logging.logger): The logger object to use
+
+       """
+       self.logger = logger
    def child_setup(self):
        """Convenient setup hook for child classes
        
@@ -246,6 +260,8 @@ class BaseSock(object):
          msg (str): message to log
        """
        print msg
+       if not (self.logger is None):
+          self.logger.debug(msg)
    def log_error(self,msg,exc=None):
        """Log an error with exception data
 
@@ -262,6 +278,9 @@ class BaseSock(object):
           print 'Error: %s' % msg
        else:
           print 'Error: %s, Exception: %s' % (msg,traceback.format_exc(exc))
+       if not (self.logger is None):
+          self.logger.error(msg)
+          self.logger.error(traceback.format_exc(exc))
        
    def parser_thread(self):
        """Used internally - reads from parse_q and puts parsed messages into in_q

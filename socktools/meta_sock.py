@@ -131,7 +131,7 @@ class MetaSock(base_sock.BaseSock):
          child_sock,addr,msg_type,msg_data = None,None,None,None
          while ((msg_data is None) and self.active):
            eventlet.greenthread.sleep(0)
-           addr,msg_type,msg_data = self.in_q.get()
+           child_sock,addr,msg_type,msg_data = self.in_q.get()
            if not (self.meta_sock is None): # yes, we can nest meta sockets in meta sockets
               self.meta_sock.add_msg(self,addr,msg_type,msg_data)
               if self.meta_sock.override_mode:
@@ -151,6 +151,7 @@ class MetaSock(base_sock.BaseSock):
           msg_type: the message type
           msg_data: the actual message data
        """
+       self.log_debug(msg_type)
        if self.handlers.has_key(msg_type):
           self.in_q.put((child_sock,from_addr,msg_type,msg_data))
           

@@ -33,6 +33,7 @@ import socktools
 from socktools.daemon import base_daemon
 
 import meta_chat
+import irc_sock
 
 class GeekIRCDaemon(base_daemon.BaseDaemon):
    """ The GeekIRC daemon, also known as geekircd
@@ -44,7 +45,13 @@ class GeekIRCDaemon(base_daemon.BaseDaemon):
        self.get_logger().info('Reload requested')
    def run(self):
        self.get_logger().info('Starting geekircd')
-       self.chat = meta_chat.MetaChat()
+       self.chat = meta_chat.MetaChat(logger=self.get_logger())
+
+       self.irc_listener = irc_sock.IRCSock(bind=('0.0.0.0',6667),meta_sock=self.chat,logger=self.get_logger())
+       self.irc_listener.start_server()
+
+
+       self.get_logger().info('Bound IRC socket')
 
        while self.active:
           eventlet.greenthread.sleep(3600)
