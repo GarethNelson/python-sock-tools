@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with python-sock-tools.  If not, see <http://www.gnu.org/licenses/>.
 
-This module is the entry point for the GeekIRC app. Execution starts in the start() function.
+This module is the entry point for the GeekIRC app.
 
 The basic architecture of the app is quite simple: a meta socket is used to receive messages from all users on either the websocket interface or IRC. Messages are then rebroadcast as appropriate.
 
@@ -32,8 +32,8 @@ import os
 import socktools
 from socktools.daemon import base_daemon
 
-import meta_chat
-import irc_sock
+from geekirc import meta_chat
+from geekirc import irc_sock
 
 class GeekIRCDaemon(base_daemon.BaseDaemon):
    """ The GeekIRC daemon, also known as geekircd
@@ -56,11 +56,7 @@ class GeekIRCDaemon(base_daemon.BaseDaemon):
        while self.active:
           eventlet.greenthread.sleep(3600)
 
-def start():
-    """ Entry point for the app - does nothing beyond invoke handle_rc()
-
-    The default location for the pid file is in ~/.geekircd.pid
-    """
+if __name__ == '__main__':
     pidfile_path = os.path.join(os.path.expanduser('~'),'.geekircd.pid')
     geekircd = GeekIRCDaemon(pidfile=pidfile_path)
     geekircd.handle_rc()

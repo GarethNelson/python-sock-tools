@@ -10,6 +10,7 @@ Contents
    
    overview
    modules
+   apps
    examples
    socktools.tools
 
