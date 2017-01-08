@@ -60,6 +60,5 @@ class MetaChat(meta_sock.MetaSock):
               t_sock,t_addr = t
               outdata = (source,target,msgtext)
               t_sock.send_msg('PRIVMSG',outdata,to_peer = t_addr)
-              
    def get_default_handlers(self):
        return {'PRIVMSG':[self.handle_privmsg]}

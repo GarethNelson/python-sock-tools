@@ -33,7 +33,7 @@ from socktools import tcp_linemode_mixin
 class IRCSock(tcp_linemode_mixin.TCPLinemodeMixin,tcp_sock.TCPSock):
    """An IRC socket for use by servers
 
-   This class implements the basics of the IRC protocol: just encoding and decoding messages.
+   This class implements the basics of the IRC protocol: just encoding and decoding messages and handles for a few lowlevel messages.
 
    Messages are encoded like so:
       :Source MsgType Target :Text
@@ -41,6 +41,19 @@ class IRCSock(tcp_linemode_mixin.TCPLinemodeMixin,tcp_sock.TCPSock):
    Or at least they are for PRIVMSG, IRC is a messy protocol sometimes. Note that hashing of client hostnames must be handled by the caller.
 
    """
+   def get_default_handlers(self):
+       """Return the default handlers for IRC sockets
+       
+       Note that PRIVMSG and friends are not handled here, only the lowlevel basics such as PING
+       """
+       return {'PING':[self.handle_ping]}
+   def handle_ping(self,from_addr,msg_type,msg_data):
+       """Handle PING messages from peers
+       
+       Note that this is probably not really appropriate if we're a server, but it's included for completeness
+
+       """
+       self.send_msg('PONG',msg_data,to_peer=from_addr)
    def serialise_msg(self,msg_type,msg_data):
        """Serialise a message in IRC format
 
