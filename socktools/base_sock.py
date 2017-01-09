@@ -67,6 +67,8 @@ class BaseSock(object):
       tick_interval (int):  time in seconds to wait between ticks
       sock (socket.socket): if not None, specifies a socket object to be used - should be used only for testing
       meta_sock (meta_sock.MetaSock): if not None, specifies the meta socket this socket belongs to, see meta_sock.py
+      logger (logging.Logger): a logger object
+      no_async (bool): if set True, no attempts will be made to go async except for sending messages
 
    Attributes:
       known_peers (dict):                  all currently connected peers have an entry in this dict, the contents of the dict are another dict with metadata
@@ -81,7 +83,7 @@ class BaseSock(object):
       logger (logging.logger):             the logger to use for this socket
       active (bool):                       indicates whether this socket is active and working
    """
-   def __init__(self,bind=None,connect=None,handlers={},timeout=10,tick_interval=0.25,sock=None,meta_sock=None,logger=None):
+   def __init__(self,bind=None,connect=None,handlers={},timeout=10,tick_interval=0.25,sock=None,meta_sock=None,logger=None,no_async=False):
        self.known_peers = {}
        self.logger      = logger
        self.pool        = eventlet.GreenPool(1000)
@@ -100,8 +102,10 @@ class BaseSock(object):
        if not (connect is None): self.connect_to(connect)
        self.child_setup()
        self.active = True
-       for x in xrange(10): self.pool.spawn_n(self.parser_thread)
-       for x in xrange(10): self.pool.spawn_n(self.handler_thread)
+       self.no_async = no_async
+       if not no_async:
+          for x in xrange(10): self.pool.spawn_n(self.parser_thread)
+          for x in xrange(10): self.pool.spawn_n(self.handler_thread)
        self.pool.spawn_n(self.recv_thread)
        self.pool.spawn_n(self.timeout_thread)
    def setup_logger(self,logger):
@@ -215,7 +219,33 @@ class BaseSock(object):
                    if self.known_peers.has_key(addr):
                       self.known_peers[addr]['last'] = time.time()
                    self.log_debug('Got raw data: %s' % str(data))
-                   self.parse_q.put((addr,data))
+                   if self.no_async:
+                      try:
+                         msg_type,msg_data = self.parse_msg(data)
+                      except Exception,e:
+                         self.log_error('Error parsing packet from %s:%s' % addr,exc=e)
+                      addr,msg_type,msg_data = self.handle_all(addr,msg_type,msg_data)
+                      self.run_handler(addr,msg_type,msg_data)
+                   else:
+                      self.parse_q.put((addr,data))
+   def run_handler(self,addr=None,msg_type=None,msg_data=None):
+       eventlet.greenthread.sleep(0)
+       while ((msg_data is None) and self.active):
+          eventlet.greenthread.sleep(0)
+          if not self.no_async:
+             addr,msg_type,msg_data = self.in_q.get()
+          if not (self.meta_sock is None):
+             self.meta_sock.add_msg(self,addr,msg_type,msg_data)
+             if self.meta_sock.override_mode:
+                continue
+          if self.handlers.has_key(msg_type):
+             for handler in self.handlers[msg_type]:
+                 if self.no_async:
+                    self.handler_wrapper(handler,addr,msg_type,msg_data)
+                 else:
+                    self.pool.spawn_n(self.handler_wrapper,handler,addr,msg_type,msg_data)
+
+       
    def handler_thread(self):
        """Used internally - reads from in_q and passes to the appropriate handler
 
@@ -223,18 +253,7 @@ class BaseSock(object):
           This method should only be run from inside the class and inside a greenthread
        """
        while self.active:
-          eventlet.greenthread.sleep(0)
-          addr,msg_type,msg_data = None,None,None
-          while ((msg_data is None) and self.active):
-            eventlet.greenthread.sleep(0)
-            addr,msg_type,msg_data = self.in_q.get()
-            if not (self.meta_sock is None):
-               self.meta_sock.add_msg(self,addr,msg_type,msg_data)
-               if self.meta_sock.override_mode:
-                  continue
-            if self.handlers.has_key(msg_type):
-               for handler in self.handlers[msg_type]:
-                   self.pool.spawn_n(self.handler_wrapper,handler,addr,msg_type,msg_data)
+          self.run_handler()
    def handler_wrapper(self,handler,addr,msg_type,msg_data):
        """Invokes the specified handler while catching exceptions
 
